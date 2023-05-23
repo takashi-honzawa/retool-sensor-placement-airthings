@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "types": ["react", "react-dom"],
+    "allowJs": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es6",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "lib": ["es6", "dom", "es2017"],
+    "skipLibCheck": true,
+  }
+}

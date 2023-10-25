@@ -1,52 +1,40 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react'
 import { FloorPlanEngine } from '@archilogic/floor-plan-sdk'
 
-import { placeHub } from './helpers/placeHubs'
 import { startupSettings } from './utils/constants'
+import { placeHub } from './helpers/placeHubs'
+import { placeSensor } from './helpers/placeSensors'
+import { createLine, createCircle } from './helpers/draw'
+import { addMarker } from './helpers/marker'
+
 import './FloorPlan.css'
 
 let hasLoaded = false
 let fpe
+let sensorType
 
 let hubCount
-let spaceProCount
-let co2MiniCount
+let sensorCount
 
 const FloorPlan = ({ triggerQuery, model, modelUpdate }) => {
   const container = useRef(null);
   const { token, floorId } = model
-  
+  sensorType = model.sensorType
+
   console.log('model', model)
   
-  function addMarker(fpe, pos, className){
-    const el = document.createElement('div')
-    el.classList.add(className)
-    const marker = fpe.addHtmlMarker({
-      pos: pos,
-      el
+  function getSensors(fpe){
+    const state = {
+      facadeDistance: 3,
+      doorDistance: 3
+    }
+    const sensorPoints = placeSensor(fpe, state)
+    sensorCount = sensorPoints.length
+    sensorPoints.forEach(sensorPoint => {
+      addMarker(fpe, sensorPoint, sensorType.id)
     })
-    return marker
   }
 
-  function getSensors(fpe){
-    const spaces = fpe.resources.spaces
-    const selectedSpaces = spaces.filter(space => {
-      return space.program !== 'void' && space.program !== 'circulate' && space.program !== 'care' && space.usage !== 'undefined'
-    })
-    let miniCount = 0
-    let proCount = 0
-    selectedSpaces.forEach(space => {
-      if(space.area < (100 / 10.764)){
-        addMarker(fpe, [space.center[0], space.center[1]], 'co2-mini')
-        miniCount += 1
-      } else {
-        addMarker(fpe, [space.center[0], space.center[1]], 'space-pro')
-        proCount += 1
-      }
-    })
-    spaceProCount = proCount
-    co2MiniCount = miniCount
-  }
   function getHubs(fpe){
     const hubs = placeHub(fpe)
     hubCount = hubs.length
@@ -57,22 +45,41 @@ const FloorPlan = ({ triggerQuery, model, modelUpdate }) => {
   
   async function initFloorPlan(){
     if(!token || !floorId) return
+    if(hasLoaded === floorId) return
+    hasLoaded = floorId
     fpe = new FloorPlanEngine(container.current, startupSettings)
-      await fpe.loadScene(floorId, {publishableToken: token})
-      hasLoaded = floorId
-      return fpe
+    await fpe.loadScene(floorId, {publishableToken: token})
+    return fpe
+  }
+
+  function onClick(fpe){
+    fpe.on('click', (event) => {
+      // const state = {
+      //   facadeDistance: 3,
+      //   doorDistance: 3
+      // }
+      // const sensorPoints = placeSensor(fpe, state)
+      const hubs = placeHub(fpe)
+    })
   }
   
   useEffect(() => {
-    if(fpe && hasLoaded === floorId) return
     if(container.current){
       initFloorPlan()
-      .then((fpe) => {
-        getHubs(fpe)
-        getSensors(fpe)
-        modelUpdate({hubCount, spaceProCount, co2MiniCount})
-      })
     }
+  })
+
+  useEffect(() => {
+    if(!fpe) return
+    if(!sensorType) return
+    getSensors(fpe)
+    getHubs(fpe)
+    modelUpdate({hubCount, sensorCount})
+  })
+
+  useEffect(() => {
+    if(!fpe) return
+    onClick(fpe)
   })
   
   return(

@@ -24,18 +24,27 @@ html, body {
   z-index: 1000;
   contain: layout;
   will-change: transform;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   border: solid 1pt #000000;
 }
 .hub-marker{
-  background-color: #03fe02;
+  background-image: url('https://takashi-honzawa.github.io/retool-template-icons/sensor-placement/airthings-custom-icons/airthings_hub.png');
 }
-.space-pro{
-  background-color: #03a1ff;
-  border-radius: 100%;
+.spacePro{
+  background-image: url('https://takashi-honzawa.github.io/retool-template-icons/sensor-placement/airthings-custom-icons/airthings_space_pro.png');
 }
-.co2-mini{
-  background-color: #fffb03;
-  border-radius: 100%;
+.spcaeCo2Mini{
+  background-image: url('https://takashi-honzawa.github.io/retool-template-icons/sensor-placement/airthings-custom-icons/airthings_co2mini.png');
+}
+.spacePlus{
+  background-image: url('https://takashi-honzawa.github.io/retool-template-icons/sensor-placement/airthings-custom-icons/airthings_space_plus.png');
+}
+.spaceCo2{
+  background-image: url('https://takashi-honzawa.github.io/retool-template-icons/sensor-placement/airthings-custom-icons/airthings_space_pro.png');
 }

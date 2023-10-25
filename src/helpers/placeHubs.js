@@ -15,19 +15,20 @@ import { angle, closestPointOnPolygons } from './common'
 export function placeHub(fpe /*, state*/){
   // all the globals + conversion to metric
   const wallOffsetInFt = 3
-  const maxHubDistanceInFt = 70
+  const maxHubDistanceInFt = 100
+  const doorOffsetInFt = 3
+
   const wallOffset = feetToMeters({ feet: wallOffsetInFt })
   const maxHubDistance = feetToMeters({ feet: maxHubDistanceInFt })
+  const doorOffset = feetToMeters({ feet: parseFloat(doorOffsetInFt) }) || 1
   
-  const productId = '!94d91d4c-06e8-42bc-aaf6-5852b19e59de'
-
   let pointsArray = []
   let spaceShapes = []
   let sensors = []
 
   let doorContours = fpe.scene.nodesByType.door.map(node => {
     let contour = getContour(node.getWorldPosition())
-    return polygonOffset([contour], 0.1)[0]
+    return polygonOffset([contour], doorOffset)[0]
   })
 
   // get the boundary and outline shapes of the floor plan
@@ -36,7 +37,8 @@ export function placeHub(fpe /*, state*/){
   const exteriorWallOffset = wallOffset || 1
 
   // contract the boundary shape by the wall offset to get a smaller shape
-  const innerFacade = polygonOffset(polygonOffset([boundary.shape], 1), -1)
+  //const innerFacade = polygonOffset(polygonOffset([boundary.shape], 1), -1)
+  const innerFacade = polygonOffset([outline], -0.45)
   let innerFacadeOffset = polygonOffset(innerFacade, -exteriorWallOffset)
   boundingBox = polygonBounds(innerFacadeOffset)
 
@@ -94,7 +96,7 @@ export function placeHub(fpe /*, state*/){
       }
     }
   }
-
+    
   pointsArray.forEach(point => {
     // place a sensor on the closest point on the closest wall in that space
     const closestPoint = closestPointOnPolygons(point, wallPolylinesArray)
@@ -109,10 +111,24 @@ export function placeHub(fpe /*, state*/){
     const rotation = angle(segment[0][0], segment[0][1], segment[1][0], segment[1][1])
     sensors.push({
       point: sensorPoint,
-      src: productId,
+      src: null,
       rotation: rotation
     })
   })
+
+  // const layer = fpe.addLayer({ id: 'inner-facade' })
+  // layer.clear()
+  // layer.addGraphic({
+  //   shapes: [
+      
+  //     {
+  //       type: 'polygon',
+  //       points: innerFacadeOffset[0],
+  //       style: { stroke: 0xFFA500, strokeWidth: 10 }
+  //     }
+
+  //   ]
+  // })
 
   return sensors
 }
